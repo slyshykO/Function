@@ -26,6 +26,19 @@ SOFTWARE.
 
 #include <functional>
 #include <memory>
+#ifndef __cpp_exceptions
+#include <cstdio>
+#endif
+
+#ifdef __cpp_exceptions
+#define FUNC_THROW_BAD_FUNC() do{throw std::bad_function_call();}while(0)
+#else
+
+#ifndef FUNC_THROW_BAD_FUNC
+    #define FUNC_THROW_BAD_FUNC() do{printf("%s","ERROR: Bad function call.\n");}while(0)
+#endif
+
+#endif
 
 template <class, size_t MaxSize = 1024> class Function;
 
@@ -99,7 +112,8 @@ public:
 
   R operator()(Args... args) {
     if (!invoker) {
-      throw std::bad_function_call();
+      FUNC_THROW_BAD_FUNC();
+      return R();
     }
     return invoker(&data, std::forward<Args>(args)...);
   }
